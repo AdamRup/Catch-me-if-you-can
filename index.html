@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Simple Map</title>
+    <meta name="viewport" content="initial-scale=1.0">
+    <meta charset="utf-8">
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+
+        let szerokosc = 50.06;
+        let wysokosc = 19.939;
+
+        document.addEventListener('keypress', (e) => {
+            console.log(e);
+            switch(e.charCode){
+                case 97:
+                    szerokosc = szerokosc - 10.00;
+                    console.log('lewo');
+                    break;
+                case 100:
+                    szerokosc =szerokosc +10.00;
+                    console.log('prawo');
+                    break;
+                case 119:
+                    wysokosc = wysokosc + 10.00;
+                    console.log('gora');
+                    break;
+                case 115:
+                    wysokosc = wysokosc - 10.00;
+                    console.log('dol');
+                    break;
+            }
+        });
+        // Initialize and add the map
+        function initMap() {
+            // The location of cracow
+            let cracow = { lat: szerokosc, lng: wysokosc};
+            // The map, centered at cracow
+            let map = new google.maps.Map(
+                document.getElementById('map'), { zoom: 4, center: cracow });
+            // The marker, positioned at cracow
+            let marker = new google.maps.Marker({ position: cracow, map: map });
+        }
+
+        
+    </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARkS-dsh-7IirtcQg3oSZEHudV6Uw9Iic&callback=initMap" async
+        defer>
+    </script>
+</body>
+
+</html>
