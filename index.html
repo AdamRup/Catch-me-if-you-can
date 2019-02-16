@@ -6,70 +6,154 @@
     <meta name="viewport" content="initial-scale=1.0">
     <meta charset="utf-8">
     <style>
-        /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
 
-        #map {
-            width: 80%;
-            display: flex;
-        }
-
-        /* Optional: Makes the sample page fill the window. */
-
-        html,
-        body {
+        html,body {
             width: 100%;
             height: 100%;
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
+        }
+        #map {
+            width: 100%;
+            height: 70%;
+            display: flex;
+        }
+        #wraper{
+            background: black;
+            width: 100%;
+            height: 30%;
+            visibility: hidden;
+            display: flex;
+            align-items: center;
             flex-direction: row;
+        }
+        #options{
+            height: 100%;
+            width: 50%;
+            background: lightgray;
+            border-right: 2px solid black;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+        }
+        #chat-section{
+            height: 100%;
+            width: 50%;
+            display: flex;
+            flex-direction: column;
         }
 
         #chat{
-            background: black;
-            width: 20%;
-            height: 100%;
-            visibility: hidden;
+            height: 85%;
+            background: lightgray;
         }
+        #sender{
+            height: 15%;
+            background: darkgray;
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            align-items: center;
+        }
+        #avatar{
+            width: 60%;
+        }
+        #playerName{
+            width: 60%;
+        }
+        #playerOptions{
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            width: 50%;
+            height: 100%;
+        }
+
         #avatarPath{
-            
-            color: white;
+            height: 50%;
+            width: 100%;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+        #nickOptions{
+            height: 50%;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start center;        
+        }
+
+        #server-information{
+            width: 50%;
+            height: 100%;
+            background: red;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;      
+            font-size: 30px;
         }
     </style>
 </head>
 
-<body>
+<body onload="onLoad()">
     <div id="map"></div>
-    <div id="chat">
-        <div id="avatarPath">
-            <span>Podaj ścieżkę do swojego awatara:</span>
-            <input type="text" id="avatar">
-            <button id="avatarBtn">Dodaj avatar</button>
+    <div id="wraper">
+        <div id="options">
+            <div id="playerOptions">
+                <div id="nickOptions">
+                    <span>Podaj swój nick:</span>
+                    <input type="text" id="playerName">
+                </div>
+                <div id="avatarPath">
+                    <span>Podaj ścieżkę do swojego awatara:</span>
+                    <input type="text" id="avatar">
+                    <button id="avatarBtn">Połącz się</button>
+                </div>
+            </div>
+            <div id="server-information">
+                <p id="connInfo">Nie połączono</p>
+            </div>
         </div>
-        <span>Conecting...</span>
-        <input type="text" id="input" disabled="disabled">
-        <input type="submit">
+        <div id="chat-section">
+            <div id="chat">
+
+            </div>
+            <div id="sender">
+                <input type="text" id="input" disabled="disabled">
+                <input type="submit" id="send">
+            </div>
+        </div>
+
     </div>
     <script>
         let geo = navigator.geolocation;
-        const chat = document.getElementById('chat');
+        const chat = document.getElementById('wraper');
         let avatar = document.getElementById('avatar');
         const avatarBtn = document.getElementById('avatarBtn');
         let trueAvatar;
 
         if (geo) {
             geo.getCurrentPosition(function (location) {
+                //zmienna szerokości geograficznej
                 let szerokosc = location.coords.latitude;
-                console.log('lat' + location.coords.latitude);
+                // console.log('lat' + location.coords.latitude);
 
+                //zmienna wysokości geograficznej
                 let wysokosc = location.coords.longitude;
-                console.log('lng' + location.coords.longitude);
+                // console.log('lng' + location.coords.longitude);
 
+                //zmienna znacznika
                 let marker;
 
+                //event umolwiający przemieszczanie się dzięki strzałkom
                 document.addEventListener('keydown', (e) => {
                     console.log(e);
                     switch (e.keyCode) {
@@ -86,13 +170,14 @@
                             wysokosc += 0.01;
                             break;
                     }
+                    //przesunięcie markera w wyznaczoną stronę
                     marker.setPosition({ lat: szerokosc, lng: wysokosc });
                 });
-
+                //event wczytujący avatar
                 avatarBtn.addEventListener('click', function () {
                     trueAvatar = {
                         url: avatar.value,
-                        scaledSize: new google.maps.Size(100,80),
+                        scaledSize: new google.maps.Size(50, 50),
                     };
                     marker = new google.maps.Marker({
                         position: yourPosition,
@@ -104,27 +189,48 @@
                     avatarBtn.disabled = "true";
                     console.log(trueAvatar);
                 })
-
-                // The location of yourPosition
+                // lokacja, w której się znajduje uyżtkownik
                 let yourPosition = { lat: szerokosc, lng: wysokosc };
-                // The map, centered at yourPosition
+                // wycentrowanie mapy na pozycji, w której znajduje się użytkownik
                 let map = new google.maps.Map(
                     document.getElementById('map'),
                     {
-                        zoom: 15,
+                        zoom: 12,
                         center: yourPosition
                     });
-                // The marker, positioned at yourPosition
                 chat.style.visibility = 'visible';
-
             });
-
-
         }
         else {
             alert("Nie można było znaleźć twojej lokalizacji. Przykro :(");
             console.log('error');
         }
+
+
+        // websocket
+        const connInfo = document.getElementById("connInfo");
+        const serverInfo = document.getElementById("server-Information");
+
+        function onLoad(){
+            const webSocketUri = "ws://91.121.6.192:8010";
+            webSocket = new WebSocket(webSocketUri);
+            webSocket.onopen = function(event){onConnect(event)};
+            webSocket.onclose = function(event){onDisconnect(event)};
+        }
+
+        function onConnect(event){
+            console.log("connected");
+            connInfo.innerHTML = "Połączono";
+            serverInfo.style.background = "lightgreen";
+        }
+
+        function onDisconnect(event){
+            console.log("disconnect");
+            connInfo.innerHTML = "Offline";
+            serverInfo.style.background = "red";
+        }
+
+
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyARkS-dsh-7IirtcQg3oSZEHudV6Uw9Iic&callback" async
         defer>
