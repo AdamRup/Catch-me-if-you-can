@@ -45,7 +45,7 @@
             flex-direction: column;
         }
 
-        #chat{
+        #Messages{
             height: 85%;
             background: lightgray;
         }
@@ -123,7 +123,7 @@
             </div>
         </div>
         <div id="chat-section">
-            <div id="chat">
+            <div id="Messages">
 
             </div>
             <div id="sender">
@@ -199,7 +199,16 @@
                         center: yourPosition
                     });
                 chat.style.visibility = 'visible';
+
+                const playerName = document.getElementById("playerName").value;
+                
+                //wysłanie pozycji
+                let positionData = { "1": yourPosition, "2": playerName, "3": "position" }
+                webSocket.send(JSON.stringify(positionData));
+
             });
+
+
         }
         else {
             alert("Nie można było znaleźć twojej lokalizacji. Przykro :(");
@@ -209,25 +218,55 @@
 
         // websocket
         const connInfo = document.getElementById("connInfo");
-        const serverInfo = document.getElementById("server-Information");
+        const playerName = document.getElementById("playerName").value;
+        const text = document.getElementById("input").value;
+        let message;
+        let i;
+        let messageData;
 
-        function onLoad(){
+
+        //funkcja łącząca aplikacje z websocketem
+        function onLoad() {
             const webSocketUri = "ws://91.121.6.192:8010";
             webSocket = new WebSocket(webSocketUri);
-            webSocket.onopen = function(event){onConnect(event)};
-            webSocket.onclose = function(event){onDisconnect(event)};
+            webSocket.onopen = function (event) { onConnect(event) };
+            webSocket.onclose = function (event) { onDisconnect(event) };
+            webSocket.onmessage = function (event) { Message(event) };
         }
 
-        function onConnect(event){
+        //funkcja informująca o połączeniu z websocketem
+        function onConnect(event) {
+            const serverInfo = document.getElementById("server-Information");
             console.log("connected");
-            connInfo.innerHTML = "Połączono";
+            connInfo.innerHTML = "Connect";
             serverInfo.style.background = "lightgreen";
         }
 
-        function onDisconnect(event){
+
+        //funkcja informująca o braku połączenia z websocketem
+        function onDisconnect(event) {
+            const serverInfo = document.getElementById("server-Information");
             console.log("disconnect");
             connInfo.innerHTML = "Offline";
             serverInfo.style.background = "red";
+        }
+
+        //funkcja tworząca wiadomość czatu
+        function createMessage() {
+            messageData = { "1": playerName, "2": text, "3": "message" }
+            message = JSON.stringify(messageData);
+            text = "";
+            playerName;
+            webSocket.send(message);
+        }
+        //funkcja informująca o wiadomości
+        function Message(event) {
+            playerName.value;
+            message = event.data;
+            i = JSON.parse(message);
+            if (i['3'] == "message") {
+                message = log.innerHTML = i['1'] + " " + i['2'];
+            }
         }
 
 
